@@ -1,0 +1,57 @@
+# Abhängigkeiten und lokale Paketmanager-Caches
+node_modules/
+.npm/
+.pnpm-store/
+
+# Next.js und generierte Build-Artefakte
+.next/
+/out/
+/dist/
+/build/
+next-env.d.ts
+*.tsbuildinfo
+
+# Lokale Konfiguration und Secrets; dokumentierte Vorlage versionieren
+.env*
+!.env.example
+/secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Tests, Coverage und Playwright-Sitzungen (können Cookies enthalten)
+coverage/
+.nyc_output/
+playwright-report/
+playwright/.cache/
+playwright/.auth/
+test-results/
+blob-report/
+
+# Tool-Caches und Logs
+.cache/
+.eslintcache
+.stylelintcache
+*.log
+
+# Lokale Datenbank-Dumps und Backups; Prisma-Migrationen bleiben versionierbar
+/backups/
+/dumps/
+*.dump
+*.sql.gz
+*.sql.zst
+*.bak
+
+# Lokale Image-Metadaten
+/image-metadata.json
+
+# Editor- und Betriebssystemdateien
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,142 @@
+import type { Member } from "@/features/family/types";
+import type { DemoEvent } from "@/features/calendar/types";
+// Fiktive, deterministische Fixtures. Keine produktiven Datenquellen.
+export const demoToday = "2026-11-16";
+export const demoMembers: Member[] = [
+  {
+    id: "anna",
+    name: "Anna",
+    initials: "AN",
+    color: "blue",
+    label: "Erwachsene",
+  },
+  {
+    id: "ben",
+    name: "Ben",
+    initials: "BE",
+    color: "pink",
+    label: "Erwachsener",
+  },
+  {
+    id: "mila",
+    name: "Mila",
+    initials: "MI",
+    color: "green",
+    label: "Kinderprofil · ohne Login",
+  },
+  {
+    id: "leo",
+    name: "Leo",
+    initials: "LE",
+    color: "purple",
+    label: "Kinderprofil · ohne Login",
+  },
+];
+export const demoEvents: DemoEvent[] = [
+  {
+    id: "1",
+    title: "Mit dem Rad zur Schule",
+    date: demoToday,
+    time: "07:45",
+    end: "08:15",
+    location: "Grundschule",
+    memberIds: ["ben", "mila", "leo"],
+    color: "pink",
+  },
+  {
+    id: "2",
+    title: "Mila hat Schwimmtraining",
+    date: demoToday,
+    time: "15:30",
+    end: "16:30",
+    location: "Stadtbad",
+    memberIds: ["anna", "mila"],
+    color: "green",
+  },
+  {
+    id: "3",
+    title: "Gemeinsam Abendessen",
+    date: demoToday,
+    time: "18:30",
+    end: "19:30",
+    location: "Zuhause",
+    memberIds: ["anna", "ben", "mila", "leo"],
+    color: "blue",
+  },
+  {
+    id: "4",
+    title: "Leos Musikstunde",
+    date: "2026-11-17",
+    time: "16:00",
+    end: "17:00",
+    location: "Musikschule",
+    memberIds: ["ben", "leo"],
+    color: "purple",
+  },
+  {
+    id: "5",
+    title: "Elternabend",
+    date: "2026-11-18",
+    time: "19:00",
+    end: "20:30",
+    location: "Grundschule",
+    memberIds: ["anna", "ben"],
+    color: "pink",
+  },
+  {
+    id: "6",
+    title: "Zeit für den Wochenmarkt",
+    date: "2026-11-21",
+    time: "10:00",
+    end: "11:30",
+    location: "Marktplatz",
+    memberIds: ["anna", "mila"],
+    color: "green",
+  },
+  {
+    id: "7",
+    title: "Ausflug in den Wald",
+    date: "2026-11-22",
+    time: "11:00",
+    end: "14:00",
+    location: "Stadtwald",
+    memberIds: ["anna", "ben", "mila", "leo"],
+    color: "blue",
+  },
+];
+export const demoTasks = [
+  {
+    id: "1",
+    title: "Schwimmtasche packen",
+    memberId: "mila",
+    done: false,
+    note: "Heute · vor 15:00",
+  },
+  {
+    id: "2",
+    title: "Bücher zurückbringen",
+    memberId: "ben",
+    done: false,
+    note: "Heute · Bücherei",
+  },
+  {
+    id: "3",
+    title: "Pflanzen gießen",
+    memberId: "leo",
+    done: false,
+    note: "Heute",
+  },
+  {
+    id: "4",
+    title: "Wochenessen planen",
+    memberId: "anna",
+    done: true,
+    note: "Erledigt",
+  },
+];
+export const demoShopping = [
+  { id: "1", name: "Hafermilch", quantity: "2 × 1 l", checked: false },
+  { id: "2", name: "Äpfel", quantity: "1 kg", checked: false },
+  { id: "3", name: "Vollkornbrot", quantity: "1 Stück", checked: false },
+  { id: "4", name: "Naturjoghurt", quantity: "500 g", checked: true },
+];

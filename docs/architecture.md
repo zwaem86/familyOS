@@ -1,28 +1,66 @@
-# Architektur – Phase 1
+# Architektur – Phase 2
 
-Modularer Monolith mit Next.js App Router und React. Route Group `(dashboard)` bündelt die gemeinsame AppShell; sie ist kein URL-Bestandteil. Features liegen unter `src/features`, gemeinsame UI unter `src/components`.
+Modularer Monolith mit Next.js App Router, React, TypeScript Strict und
+PostgreSQL/Prisma. `(dashboard)` besitzt ein authentifiziertes dynamisches
+Layout. Jede Familienaktion prüft zusätzlich selbst die Session; das Layout
+ist kein Ersatz für Endpunktautorisierung.
 
-`src/features/dashboard/demo-data.ts` enthält ausschließlich deterministische, fiktive Fixtures. Domain-Typen für Profile und Demo-Termine sind getrennt. Keine DB, Authentifizierung, produktiven Server Actions oder Familien-API. `/api/health/live` liefert ausschließlich einen Prozessstatus.
+## Sicherheits- und Datenpfad
 
-Inter kommt über `@fontsource/inter` aus dem eigenen Build. Keine Google-Font-Abfrage, keine Analytik, kein externer Wetterdienst. Aufgaben und Einkauf verwenden React-Zustand; Routewechsel und Neuladen dürfen ihn zurücksetzen. Demo-Heute ist bewusst der 16. November 2026 und wird angezeigt.
+`/api/auth/[...nextauth]` verwendet Auth.js Credentials und Argon2id. Die
+kanonische Runtime-Origin wird explizit validiert. Auth-POSTs benötigen korrekte
+Origin und Auth.js-CSRF-Token. Server Actions prüfen ebenfalls Origin und
+verwenden Zod an jeder Eingabegrenze.
 
-Kalendernavigation nutzt ISO-Datumsschlüssel und UTC-Mittag für reine Demo-Datumsarithmetik. Anzeige erfolgt explizit in Europe/Berlin. Diese Fixtures und Hilfsfunktionen ersetzen weder das produktive UTC-/Ganztagsmodell noch die Provider-Schnittstelle aus Phase 3.
+`src/lib/auth/session.ts` liest das verschlüsselte JWT aus dem HttpOnly-Cookie,
+prüft die gehashte Session-ID in PostgreSQL, den festen Ablauf und die aktuelle
+Erwachsenen-Mitgliedschaft. Aktive Familie kommt ausschließlich aus dieser
+DB-Session. `src/features/family/server/service.ts` prüft jede Familienoperation
+mit serverseitigem Principal; Abfragen und Updates werden mit familyId begrenzt.
+Familienobjekte geben keine Passwort-Hashes oder Einladungs-Hashes an Clients aus.
 
-shadcn/ui wird als projektverwalteter Quellcode mit `components.json`, `cn`, CVA, Radix Slot und Button umgesetzt. Tailwind v4 verwendet den PostCSS-Adapter und CSS-Tokens; eine Tailwind-v3-Konfiguration ist nicht erforderlich. Anleitung: https://ui.shadcn.com/docs/installation/manual und https://nextjs.org/docs/app/getting-started/installation.
+`prisma/schema.prisma` enthält nur Phase-2-Kernmodelle, keine Kalender- oder
+Essensplanmodelle. SQL-Checks koppeln Rollen, Profiltypen und User-Zuordnung.
+Setup erstellt Bootstrap-Singleton, ersten User und Familie atomar. Einladungen,
+Annahme und Kinderkapazität werden unter Family-Zeilensperre serialisiert.
+Einladungen sind E-Mail-gebunden, gehasht, kurzlebig und nur einmal einlösbar.
+Zwei Erwachsene sind ADMIN; zwei Kinder haben keinen User und keinen Login.
 
-## Sicherheitsgrenze
+Datenbankgestützte Login-Limits werden zwischen Instanzen geteilt und überleben
+Neustarts. Ungeprüfte Forwarded-Header beeinflussen weder Family-ACLs noch Limits.
+Logout löscht die serverseitige Session, sodass kopierte Cookies unwirksam werden.
+Siehe [ADR 0002](decisions/0002-credentials-sessions.md).
 
-Die gesamte UI ist öffentlich. Keine echten Familieninformationen eingeben. Kinderprofile sind ausdrücklich fiktiv. Vor Phase 2 sind Session-/Family-ACLs, Credentials, Bootstrap, Rate-Limits, CSRF-/Origin-Schutz, sichere Cookies und autorisierte Datenzugriffe erforderlich. Phase 1 täuscht diese Schutzfunktionen nicht vor.
+## Rendering und CSP
 
-CSP beschränkt Ressourcen auf die eigene Origin, verhindert Einbettung und fremde Form-Ziele. Next.js benötigt für den statischen Bootstrap aktuell Inline-Skripte; daher `script-src 'self' 'unsafe-inline'`. Dies schützt nicht vollständig vor Script-Injection und muss vor Verarbeitung privater Daten mit einer Nonce-Strategie überprüft werden. React rendert sämtliche Demo-Eingaben als Text. Nur im Entwicklungsmodus wird für React-Debugging gemäß Next.js-Dokumentation zusätzlich `unsafe-eval` erlaubt; die Produktions-CSP schließt es aus. HTTPS/HSTS bleiben Aufgabe der vorhandenen Infrastruktur.
+Next.js `src/proxy.ts` erzeugt pro Anfrage eine zufällige Script-Nonce und reicht
+die CSP an Renderer und Browser weiter. Alle Seiten sind dynamisch. Script-
+`unsafe-inline` entfällt; `unsafe-eval` gilt nur in Entwicklung. Inline-Styles
+bleiben für bestehende Komponenten erlaubt. Antworten sind private/no-store.
+CSP ist keine Autorisierung. HTTPS/HSTS und der vertrauenswürdige Reverse Proxy
+bleiben Aufgabe der bestehenden Infrastruktur.
 
-Die Kompatibilitätsentscheidung für ESLint ist in [ADR 0001](decisions/0001-eslint-compatibility.md) dokumentiert. Installierte Versionen stehen exakt in `package.json` und `package-lock.json`. Buildumgebung: Node 26.13.0; Image: unterstützter Node-LTS-Major 24 auf Debian Bookworm slim. Der Container-Build ist separat zu verifizieren.
+## Isolierte Demos
 
+`src/features/dashboard/demo-data.ts` und `src/features/meal-plan/demo-data.ts`
+enthalten ausschließlich fiktive Fixtures. Fachansichten zeigen bewusst den
+16. November 2026. Kalender, Aufgaben, Einkauf, Wetter und Essensplan sind
+weiterhin ohne produktive API oder DB-Persistenz. Profile in Einstellungen
+werden getrennt davon aus autorisierten DB-Abfragen geladen.
 
-## Essensplan-Demo (Phase-1-Erweiterung)
+`DemoMealProvider` hält gespeicherte Demo-Gerichte flüchtig im React-Zustand;
+Navigation zwischen Dashboard und Editor erhält sie, Neuladen setzt sie zurück.
+Datumsschlüssel und Wochenarithmetik werden weiterverwendet. SQL-DATE-Einträge,
+produktive CalendarProvider und Wiederholungen bleiben späteren Phasen vorbehalten.
 
-`src/features/meal-plan` besitzt eigene fiktive Fixtures und eine reine Eingabevalidierung (Trim, maximal 120 Zeichen; leer bedeutet Entfernen). `DemoMealProvider` im Dashboard-Layout hält gespeicherte Gerichte ausschließlich im React-Speicher, sodass `/meal-plan` und das Dashboard denselben Stand zeigen. Es gibt keine Browser-Persistenz, Datenbank oder API. Neuladen setzt den Stand zurück.
+## Betrieb
 
-Der Editor hält ungespeicherte Entwürfe separat; Speichern ändert genau den lokalen Datumsschlüssel eines Tages. Ein bestätigter Wochenwechsel verwirft nur Entwürfe, keine gespeicherten Demo-Gerichte. Vor Neuladen mit offenen Entwürfen greift zusätzlich die Browserwarnung. Formularfelder werden erst nach Hydrierung aktiviert. Der aktuelle Demo-Tag entspricht dem übrigen Prototyp, `2026-11-16`. Die vorhandenen datumsschlüsselbasierten Kalenderhilfen werden wiederverwendet. Wochen reichen von Montag bis Sonntag.
+PrismaPg-Treiberadapter, lazy DB-Client und Standalone-Ausgabe erlauben Builds
+ohne Runtime-Secrets oder DB-Zugriff. Migrationen liegen versioniert unter
+`prisma/migrations` und laufen separat vor dem Start. Das Runtime-Image enthält
+nur Standalone-Artefakte, statische Assets und public. Kein Seed mit echten Daten.
+Inter ist selbst gehostet; kein Wetter-, Mail- oder Analytikdienst.
 
-`/meal-plan?week=next` öffnet die Folgewoche aus dem Dashboard. `useSearchParams` liegt unter einer Suspense-Grenze mit gemeinsamem Ladezustand. Diese Demo ersetzt nicht die späteren autorisierten Datenzugriffe oder das SQL-DATE-Modell.
+Abhängigkeiten sind exakt per Lockfile fixiert. ESLint-Kompatibilität bleibt
+in [ADR 0001](decisions/0001-eslint-compatibility.md) dokumentiert. Tests und
+Betriebsgrenzen stehen in den Phase-2-Ergebnissen und der Betriebsanleitung.

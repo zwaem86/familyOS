@@ -1,0 +1,48 @@
+# LOCAL/TEST EXAMPLE ONLY. Does not modify the existing homelab Compose.
+# No host ports. Use a separate project name and a private test network.
+services:
+  db:
+    image: docker.io/library/postgres:17-bookworm
+    environment:
+      POSTGRES_USER: familyos
+      POSTGRES_DB: familyos
+      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD:?Set a dedicated local database password}
+    volumes:
+      - local-db:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U familyos -d familyos]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [local]
+  migrate:
+    profiles: [tools]
+    build:
+      context: .
+      target: migrations
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DB URL with hostname db for this example}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [local]
+  app:
+    build:
+      context: .
+      target: runtime
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set DB URL with hostname db for this example}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?Set canonical HTTPS origin}
+      AUTH_SECRET: ${AUTH_SECRET:?Set a fresh random secret}
+      BOOTSTRAP_SECRET: ${BOOTSTRAP_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [local]
+volumes:
+  local-db:
+networks:
+  local:
+    internal: true

@@ -10,8 +10,6 @@ import {
   Sprout,
   ArrowUpRight,
 } from "lucide-react";
-import { demoMembers } from "@/features/dashboard/demo-data";
-import { MemberAvatar } from "@/components/shared/member-avatar";
 const navigation = [
   { href: "/", label: "Übersicht", icon: House },
   { href: "/calendar", label: "Kalender", icon: CalendarDays },
@@ -19,7 +17,13 @@ const navigation = [
   { href: "/shopping", label: "Einkauf", icon: ShoppingBasket },
   { href: "/settings", label: "Einstellungen", icon: Settings },
 ];
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  familyName,
+}: {
+  children: React.ReactNode;
+  familyName: string;
+}) {
   const path = usePathname();
   return (
     <div className="app-shell">
@@ -57,8 +61,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/settings" className="family-link">
             <span className="avatar blue">F</span>
             <span>
-              <strong>Familie Sonnenschein</strong>
-              <small>4 fiktive Profile</small>
+              <strong>{familyName}</strong>
+              <small>Familie verwalten</small>
             </span>
             <ArrowUpRight size={16} aria-hidden="true" />
           </Link>
@@ -76,16 +80,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </span>
           <div className="topbar-right">
             <span className="demo-badge">UI-DEMO</span>
-            <div className="avatar-stack">
-              {demoMembers.map((m) => (
-                <MemberAvatar member={m} key={m.id} small />
-              ))}
-            </div>
           </div>
         </header>
         <div className="demo-notice">
-          Fiktive Demo · Montag, 16. November 2026 · Änderungen gelten nur bis
-          zum Neuladen.
+          Fachansichten: fiktive Demo · Montag, 16. November 2026 ·
+          Demo-Änderungen gelten nur bis zum Neuladen. Familienprofile in
+          Einstellungen werden dauerhaft gespeichert.
         </div>
         <main id="main" tabIndex={-1}>
           {children}

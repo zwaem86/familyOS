@@ -9,6 +9,7 @@ tests
 docs
 *.tsbuildinfo
 *.sql
+!prisma/migrations/**/migration.sql
 *.dump
 *.bak
 backups

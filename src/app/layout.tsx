@@ -6,8 +6,9 @@ import "@fontsource/inter/latin-700.css";
 import "./globals.css";
 export const metadata: Metadata = {
   title: "FamilyOS – Euer Familienalltag",
-  description: "FamilyOS UI-Prototyp mit ausschließlich fiktiven Demo-Daten.",
+  description: "FamilyOS – gemeinsamer Familienalltag.",
 };
+export const dynamic = "force-dynamic";
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

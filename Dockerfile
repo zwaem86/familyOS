@@ -10,11 +10,19 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
+# Prisma CLI detects OpenSSL while generating the client.
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN npm run build
+
+# Explicit release tool; never runs with the app entrypoint.
+FROM build AS migrations
+USER node
+CMD ["node", "node_modules/prisma/build/index.js", "migrate", "deploy"]
 
 FROM docker.io/library/node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 1001 familyos && useradd --system --uid 1001 --gid familyos familyos
 COPY --from=build --chown=familyos:familyos /app/.next/standalone ./
 COPY --from=build --chown=familyos:familyos /app/.next/static ./.next/static

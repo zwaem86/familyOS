@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+}
+enum Role {
+  ADMIN
+  MEMBER
+  CHILD
+}
+enum MemberType {
+  ADULT
+  CHILD
+}
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  email String @unique
+  name String
+  passwordHash String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  memberships FamilyMember[]
+  sessions AppSession[]
+}
+model Family {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  timezone String @default("Europe/Berlin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  members FamilyMember[]
+  invitations Invitation[]
+  sessions AppSession[]
+}
+model FamilyMember {
+  id String @id @default(uuid()) @db.Uuid
+  familyId String @db.Uuid
+  userId String? @db.Uuid
+  name String
+  color String
+  role Role
+  type MemberType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+  @@unique([familyId, userId])
+  @@index([userId])
+}
+model Invitation {
+  id String @id @default(uuid()) @db.Uuid
+  familyId String @db.Uuid
+  email String
+  tokenHash String @unique
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  @@index([familyId])
+}
+model AppSession {
+  tokenHash String @id
+  userId String @db.Uuid
+  familyId String @db.Uuid
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  @@index([expiresAt])
+}
+model Bootstrap {
+  id Int @id
+  createdAt DateTime @default(now())
+}
+model RateLimit {
+  key String @id
+  count Int
+  expiresAt DateTime
+  @@index([expiresAt])
+}

@@ -1,3 +1,16 @@
+# Phase-2-Ergänzung
+
+Aktuelle Runtime-Konfiguration und separate Prisma-Migrationen:
+[Phase-2-Betrieb](phase-2-operations.md). Das Image benötigt DATABASE_URL,
+NEXTAUTH_URL und AUTH_SECRET; BOOTSTRAP_SECRET nur für die Ersteinrichtung.
+Secrets ausschließlich zur Laufzeit injizieren. Migrationen niemals implizit
+beim Containerstart ausführen. Test-/Release-Prüfungen benötigen jetzt eine
+isolierte PostgreSQL-Testdatenbank. Die bisherigen Phase-1-Smoke-Ergebnisse
+sind historisch; aktuelle Ergebnisse stehen in phase-2-results.md.
+Produktives Compose und Nginx bleiben unverändert; kein Push/Deployment erfolgt.
+
+---
+
 # Image-Build und Veröffentlichung
 
 Phase 1 liefert eine öffentliche Demo ohne Auth oder persistente Daten. Keine produktiven Familieninformationen verwenden. Nginx, TLS, Firewall, vorhandene Registry und produktives Compose bleiben unverändert. Dieses Projekt führt keinen Rollout aus.

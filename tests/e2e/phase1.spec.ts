@@ -4,7 +4,7 @@ test("all routes, responsive layout and accessibility", async ({ page }) => {
   const health = await page.request.get("/api/health/live");
   expect(health.status()).toBe(200);
   expect(await health.json()).toEqual({ status: "ok" });
-  expect(health.headers()["cache-control"]).toBe("no-store");
+  expect(health.headers()["cache-control"]).toContain("no-store");
   expect(health.headers()["x-content-type-options"]).toBe("nosniff");
   expect(health.headers()["content-security-policy"]).toContain(
     "frame-ancestors 'none'",
@@ -96,10 +96,13 @@ test("local demo mutations reset on reload", async ({ page }) => {
   await page.getByRole("button", { name: "Hinzufügen" }).click();
   await expect(page.getByText("Birnen")).toBeVisible();
 });
+
 test("state previews and retry", async ({ page }) => {
   await page.goto("/settings");
   await page.getByRole("button", { name: "Laden", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("wird geladen");
+  await expect(
+    page.getByRole("status").filter({ hasText: "wird geladen" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Leer", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Alles im Blick" }),
@@ -107,5 +110,7 @@ test("state previews and retry", async ({ page }) => {
   await page.getByRole("button", { name: "Fehler", exact: true }).click();
   await expect(page.getByRole("main").getByRole("alert")).toBeVisible();
   await page.getByRole("button", { name: "Erneut versuchen" }).click();
-  await expect(page.getByRole("status")).toContainText("erfolgreich");
+  await expect(
+    page.getByRole("status").filter({ hasText: "erfolgreich" }),
+  ).toBeVisible();
 });

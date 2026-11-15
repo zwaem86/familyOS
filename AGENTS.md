@@ -1,6 +1,6 @@
 # FamilyOS
 Vor jeder Änderung `FamilyOS_Codex_Implementierung.md` vollständig lesen. Sie ist die zentrale Produkt- und Architekturvorgabe.
-Nur die ausdrücklich freigegebene Phase implementieren. Aktuell ist ausschließlich Phase 1 freigegeben.
+Nur die ausdrücklich freigegebene Phase implementieren. Phase 1 ist umgesetzt; Phase 2 ist seit dem Benutzerauftrag vom 15. November 2026 ausdrücklich freigegeben. Phase 3 und spätere Phasen bleiben gesperrt.
 Keine Änderungen an Nginx, produktivem Compose oder Homelab-Infrastruktur. Kein Deployment und kein Registry-Push ohne Auftrag.
 Demo-Daten strikt isolieren und als fiktiv kennzeichnen. Keine privaten Familieninformationen oder Secrets einchecken.
 Lint, Typecheck, Build und relevante Tests durchführen; tatsächliche Ergebnisse und Einschränkungen dokumentieren.

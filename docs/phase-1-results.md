@@ -53,3 +53,7 @@ Die Browserprüfungen liefen gegen die echte Standalone-Ausgabe. Beim ersten Dur
 Phase 1 im Browser abnehmen. Für Image-Freigabe Docker-Zugriff und Scanner auf dem vorgesehenen Build-Rechner bereitstellen und dokumentierte Prüfungen ausführen. Registry-Angaben erst vor Veröffentlichung klären. Phase 2 ausschließlich nach ausdrücklicher Freigabe beginnen.
 
 Vorgeschlagener Commit: `feat: add FamilyOS phase 1 UI prototype`. Kein Commit und kein Push wurden automatisch ausgeführt.
+
+## Nachtrag: lokaler Podman-Test am 15. November 2026
+
+Der spätere Auftrag für `deplopy/local-test.sh` ergänzt einen ausdrücklich lokalen Teststart. Der bisherige Docker-Socket-Blocker bleibt bestehen; der gemeinsame Image-Build wurde jetzt erfolgreich mit Podman 6.1.4 rootless für linux/amd64 ausgeführt. Node 24.22.3 im Image, App-UID 1001, Host-HTTP-Smoke-Test, Container-Healthcheck und alle zwölf Playwright-Tests gegen den laufenden Container bestanden. Damit sind Node-24-Container-Build und App-Start inzwischen verifiziert. Image-Scan und Registry-Publishing bleiben offen. Details und Bedienung stehen in `deplopy/README.md`.

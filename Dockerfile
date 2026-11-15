@@ -1,18 +1,18 @@
 # Supported Node.js LTS major. Update patch/digest regularly; npm dependencies are lockfile-pinned.
-FROM node:24-bookworm-slim AS dependencies
+FROM docker.io/library/node:24-bookworm-slim AS dependencies
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:24-bookworm-slim AS build
+FROM docker.io/library/node:24-bookworm-slim AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:24-bookworm-slim AS runtime
+FROM docker.io/library/node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000
 RUN groupadd --system --gid 1001 familyos && useradd --system --uid 1001 --gid familyos familyos

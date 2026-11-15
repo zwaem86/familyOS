@@ -13,3 +13,15 @@ docs
 *.bak
 backups
 image-metadata.json
+secrets
+*.pem
+*.key
+*.p12
+*.pfx
+playwright
+blob-report
+dumps
+*.sql.gz
+*.sql.zst
+.idea
+.vscode

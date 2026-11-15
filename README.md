@@ -38,6 +38,14 @@ npm run test:e2e
 
 Playwright startet den Produktionsserver automatisch. E2E-Smoke-Tests prüfen 360 px, 1024 px und 1440 px, alle Routen, Overflow, WCAG-Axe-Checks, Tastatur-Sprunglink, Navigation, Filter, Zustände und Demo-Interaktionen. Automatische Checks ersetzen keine vollständige manuelle WCAG-Prüfung.
 
+## Lokaler Container-Test mit Podman
+
+```bash
+./deplopy/local-test.sh
+```
+
+Baut ein lokales Image und startet die Demo unter http://127.0.0.1:3000. Keine Anmeldung erforderlich; fiktive Demo-Daten sind enthalten. Das Skript zeigt Build-Schritte, Health-Prüfung, Aufrufadressen und Verwaltungsbefehle. [Anleitung und Optionen](deplopy/README.md).
+
 ## Image
 
 [Build, Smoke-Test, Scan und Registry-Push](docs/deployment.md). Multi-Stage-Dockerfile, Standalone-Ausgabe, Non-Root und Health-Endpunkt sind vorbereitet. Keine Änderung an Nginx oder produktivem Compose, kein automatisches Deployment.

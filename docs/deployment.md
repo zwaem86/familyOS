@@ -52,3 +52,7 @@ Aktuell nur linux/amd64 zugelassen. ARM64/Multi-Arch erst nach Verifikation nati
 Registry-Hostname/Namespace, OCI-Unterstützung, Zielarchitektur, Tag-Unveränderlichkeit, Zugangsdatenverwaltung, vorhandene Runtime-Konfiguration, separater Migrationsschritt ab Phase 2 und eventuelle spätere CI-Freigabe. Keine Werte erfinden.
 
 Phase 2 ergänzt DATABASE_URL, Auth.js-Secret, kanonische HTTPS-URL und vertrauenswürdige Proxy-Konfiguration. Forwarded-Header dürfen dann nur vom vertrauenswürdigen Proxy akzeptiert werden. Prisma Client erst mit Prisma-Einführung generieren; `prisma migrate deploy` bleibt ein expliziter separater Release-Schritt, niemals implizit beim Containerstart.
+
+## Lokaler Test mit Podman
+
+Für den ausdrücklich lokalen Test existiert zusätzlich [deplopy/local-test.sh](../deplopy/README.md). Es baut dasselbe Dockerfile und veröffentlicht ausschließlich `127.0.0.1:3000` (Port konfigurierbar), ohne produktive Infrastruktur zu verändern. Der Podman-Build und Start für linux/amd64 wurden erfolgreich geprüft. Dieser lokale Weg benötigt keine Registry-Werte und ersetzt weder Scan noch Release-Push.

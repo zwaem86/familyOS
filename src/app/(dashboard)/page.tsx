@@ -6,6 +6,7 @@ import {
   WeatherWidget,
   QuickActions,
 } from "@/features/dashboard/widgets";
+import { MealPlanWidget } from "@/features/meal-plan/meal-plan-widget";
 export default function DashboardPage() {
   return (
     <>
@@ -19,6 +20,7 @@ export default function DashboardPage() {
         </span>
       </div>
       <GreetingWidget />
+      <MealPlanWidget />
       <div className="dashboard-grid">
         <UpcomingEventsWidget />
         <div className="widget-column">

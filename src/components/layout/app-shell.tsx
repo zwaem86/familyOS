@@ -68,7 +68,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <header className="topbar">
           <span className="topbar-title">
             Unser Zuhause<span className="topbar-divider">/</span>
-            <span>{navigation.find((n) => n.href === path)?.label}</span>
+            <span>
+              {path === "/meal-plan"
+                ? "Essensplan"
+                : navigation.find((n) => n.href === path)?.label}
+            </span>
           </span>
           <div className="topbar-right">
             <span className="demo-badge">UI-DEMO</span>

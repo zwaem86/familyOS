@@ -2,91 +2,144 @@
 
 Stand: 15. November 2026. Repository: `/home/zwaem/Projects/familyOS`.
 
-## Auftrag und verbindliche Grenzen
+## Verbindlicher Auftrag
 
-Vor Änderungen `AGENTS.md` und die vollständige `FamilyOS_Codex_Implementierung.md` lesen. Die Master-Spezifikation ist die zentrale Produkt- und Architekturvorgabe. Ausschließlich Phase 1 ist freigegeben. Phase 2 und weitere Phasen dürfen erst nach ausdrücklicher Freigabe beginnen.
+Vor Änderungen `AGENTS.md` und `FamilyOS_Codex_Implementierung.md` vollständig lesen. Die Master-Spezifikation **Version 1.7** ist verbindlich. **Nur Phase 1 einschließlich Essensplan-Demo ist freigegeben und umgesetzt. Phase 2 nicht beginnen, bevor der Benutzer sie ausdrücklich freigibt.**
 
-Nginx, produktives Docker Compose und Homelab-Infrastruktur nicht ändern. Kein Registry-Push oder automatischer Rollout ohne Auftrag. Der zusätzlich beauftragte Podman-Start ist ausschließlich ein lokaler Test mit Loopback-Portbindung.
+Nginx, produktives Docker Compose und Homelab-Infrastruktur bleiben unverändert. Kein Registry-Push, keine automatische CI oder produktiver Rollout ohne Auftrag. Der lokale Podman-Test mit Loopback-Portbindung ist ausdrücklich beauftragt.
 
-## Projektstand
+## Implementierter Stand
 
-Phase 1 ist als navigierbarer UI-Prototyp implementiert und in Commit `6f1a0f5` (`feat: add FamilyOS phase 1 UI prototype`) enthalten. Stack: Next.js App Router, React, TypeScript Strict, Tailwind, projektverwaltete shadcn/ui-Komponenten und Lucide. Exakte Versionen stehen in `package.json` und `package-lock.json`.
+Next.js App Router, React, TypeScript Strict, Tailwind, projektverwaltete shadcn/ui-Komponenten, Lucide und selbst gehostete Inter-Schrift. Versionen sind im npm-Lockfile fixiert. Responsive AppShell mit Desktop-Sidebar und mobiler BottomNav.
 
-Die Routen `/`, `/calendar`, `/tasks`, `/shopping` und `/settings` funktionieren responsiv. Kalenderansichten und Profilfilter sind bedienbar; Aufgaben und Einkauf lassen sich lokal ergänzen und abhaken. Lade-, Leer-, Fehler- und Erfolgszustände sind vorhanden.
+| Route | Funktion in Phase 1 |
+|---|---|
+| `/` | Dashboard mit Begrüßung, Terminen, Aufgaben, Einkauf, Demo-Wetter, Essensplan und Schnellzugriffen |
+| `/calendar` | Demo-Tages-/Wochen-/Monatsansicht, Zeitraumwechsel und Profilfilter |
+| `/tasks` | Demo-Aufgaben hinzufügen und abhaken |
+| `/shopping` | Demo-Artikel hinzufügen und abhaken |
+| `/settings` | Vier fiktive Profile und Vorschau für Lade-, Leer-, Fehler- und Erfolgszustände |
+| `/meal-plan` | Abendessen für aktuelle und weitere Wochen tageweise bearbeiten |
+| `/api/health/live` | Minimales JSON `{"status":"ok"}` ohne vertrauliche Daten |
 
-Alle Daten sind fiktiv und in `src/features/dashboard/demo-data.ts` isoliert. Demo-Heute ist der 16. November 2026, Europe/Berlin. Anna, Ben, Mila und Leo sind Demo-Profile. Es gibt keine Authentifizierung, Login-Seite, Passwörter, DB oder dauerhafte Speicherung. Neuladen setzt Demo-Eingaben zurück. Ein DB-Seed und echte Testkonten sind noch nicht implementiert.
+**Keine Authentifizierung, Login-Seite, Passwörter, Datenbank oder produktive Familien-API.** Alle Angaben sind fiktiv. Demo-Heute ist bewusst Montag, der **16. November 2026**, Europe/Berlin. Keine echten Familieninformationen eingeben.
 
-## Aktuelle, noch nicht committete Änderungen
+## Essensplan: Architektur und Verhalten
 
-- `deplopy/local-test.sh`: ausführbares Bash-Skript für lokalen Image-Build und Podman-Start. Der Verzeichnisname `deplopy` entspricht dem Benutzerauftrag.
-- `deplopy/README.md`: Voraussetzungen, Optionen, Bedienung und tatsächliche Testergebnisse.
-- `Dockerfile`: vollständig qualifizierte Node-Basis `docker.io/library/node:24-bookworm-slim` in allen Stufen, damit Podman keine interaktive Registry-Auswahl benötigt.
-- `.dockerignore`: zusätzliche Ausschlüsse für Secrets, Schlüssel, Playwright-Sitzungen, Dumps und Editor-Verzeichnisse.
-- `public/.gitkeep`: stellt das für den Container-Build benötigte, bisher leere Verzeichnis auch in frischen Checkouts bereit.
-- `README.md`, `docs/deployment.md`, `docs/phase-1-results.md`: Anleitung und Nachtrag zum erfolgreichen Podman-Test.
-- Dieses Handoff: `docs/HANDOFF.md`.
+Die zuletzt beauftragte Erweiterung ist vollständig als Phase-1-Demo implementiert:
 
-Die `.gitignore` ist bereits Teil des letzten Commits und gehört nicht zum aktuellen Änderungsdiff. Es wurden keine Dateien gestagt, kein Commit erstellt und kein Push ausgeführt.
+- Dashboard: sieben Tage Montag bis Sonntag mit Datum und Gericht; heutiger Tag und heutiges Abendessen hervorgehoben, fehlende Einträge als „Noch offen“.
+- `/meal-plan?week=next` öffnet die kommende Woche. „Diese Woche“, „Nächste Woche“ und Pfeile ermöglichen weitere Wochenwechsel.
+- Jeder Tag wird bewusst einzeln gespeichert. Gerichtsnamen werden getrimmt und auf maximal 120 Zeichen geprüft. Leeres Feld speichern entfernt den Eintrag. Fehler erhalten den Entwurf.
+- Ungespeicherte Entwürfe liegen getrennt vom gespeicherten Demo-Stand. Beim Wochenwechsel wird vor Verwerfen nachgefragt; vor Neuladen mit offenen Entwürfen greift die Browserwarnung. Der eigene Link „Zur Übersicht“ fragt ebenfalls nach. Andere AppShell-Links und Browser-Zurück haben keine gesonderte SPA-Entwurfsabfrage.
+- `DemoMealProvider` im Dashboard-Layout hält ausschließlich React-Zustand. Gespeicherte Gerichte bleiben beim internen Navigieren zwischen Dashboard und Editor erhalten. **Neuladen setzt alles auf die Fixtures zurück.** Kein localStorage oder sessionStorage.
+- Die Mobile-BottomNav behält fünf Einträge. Den Essensplan erreicht man über das Dashboard; die Topbar benennt die neue Route.
+- Keine neuen Abhängigkeiten, Rezepte, KI, Einkaufslisten-Automatik oder Kalenderverknüpfung.
 
-## Lokalen Test starten
+Wichtige Dateien:
 
-Voraussetzungen: Bash, betriebsbereites Podman und curl. Für den ersten Build ist Internetzugang erforderlich. Node/npm auf dem Host sind für das Startskript nicht nötig.
+| Pfad | Verantwortung |
+|---|---|
+| `src/features/dashboard/demo-data.ts` | Fiktive Profile, Termine, Aufgaben, Einkauf und fixes Demo-Datum |
+| `src/features/meal-plan/demo-data.ts` | Fiktive Abendessen nach lokalem ISO-Datumsschlüssel |
+| `src/features/meal-plan/demo-meal-provider.tsx` | Gemeinsamer flüchtiger Zustand und Hydrierungsbereitschaft |
+| `src/features/meal-plan/meal-plan.ts` | Eingabevalidierung und Beschriftung des Wochenbereichs |
+| `src/features/meal-plan/meal-plan-widget.tsx` | Dashboard-Wochenübersicht |
+| `src/features/meal-plan/meal-plan-editor.tsx` | Editor, Entwürfe, Speichern, Fehler und Wochenwechsel |
+| `src/features/calendar/demo-calendar.ts` | Wiederverwendete Datumsarithmetik und deutsche Datumsanzeige |
+| `src/app/(dashboard)/meal-plan/page.tsx` | Route mit Suspense-Ladezustand für `useSearchParams` |
+| `tests/unit/meal-plan.test.ts` | Validierung und Wochengrenzen |
+| `tests/e2e/meal-plan.spec.ts` | Editor-/Dashboard-Zusammenspiel und Fehler-/Entwurfsverhalten |
+
+Die spätere persistente Umsetzung mit `MealPlanEntry`, lokalem SQL-DATE je Familie und Family-ACLs bleibt **Phase 4** nach dem produktiven Kalender zugeordnet. Das Modell ist spezifiziert, aber noch nicht als Prisma-Schema oder Migration implementiert.
+
+## Git-Stand bei Übergabe
+
+Letzter Commit: `fe2b2ad` (`add local Podman demo workflow & Handoff`). Die ursprüngliche UI ist in `6f1a0f5` enthalten.
+
+**Die Essensplan-Erweiterung ist noch nicht committet.** Zum aktuellen Arbeitsbaum gehören:
+
+- Neue Route `src/app/(dashboard)/meal-plan/` und neues Feature `src/features/meal-plan/`.
+- Neue Tests `tests/unit/meal-plan.test.ts` und `tests/e2e/meal-plan.spec.ts` sowie Erweiterung der bestehenden Routenprüfung.
+- Änderungen an Dashboard-Layout, Dashboard-Seite, AppShell-Topbar und globalen Styles.
+- Spezifikation v1.7, README, Architektur, Phase-1-Plan, Prüfergebnisse und dieses Handoff.
+- Ergänzte Demo-Daten-/URL-Ausgabe in `deplopy/local-test.sh` und aktualisierte lokale Anleitung.
+
+Vor dem nächsten Commit `git status` einschließlich unversionierter Dateien prüfen. Für dieses Handoff wurden weder Dateien gestagt noch ein Commit oder Push ausgeführt.
+
+## Lokal starten
 
 ```bash
-./deplopy/local-test.sh
-# Alternativer Port:
-LOCAL_PORT=3100 ./deplopy/local-test.sh
+# Entwicklung mit Node.js 24 LTS empfohlen:
+npm ci
+npm run dev
 
+# Alternativ Image bauen und mit Podman starten:
+./deplopy/local-test.sh
+# Bei belegtem Port:
+LOCAL_PORT=3100 ./deplopy/local-test.sh
+```
+
+Nach erfolgreichem Standardstart: **http://127.0.0.1:3000**, Editor **http://127.0.0.1:3000/meal-plan**. **Anmeldung nicht erforderlich.**
+
+Podman-Skript: Bash, Podman und curl erforderlich; kein Host-Node/npm nötig. Es baut das vorhandene Multi-Stage-Dockerfile aus dem aktuellen Arbeitsbaum einschließlich uncommitteter Änderungen. Das lokale Zeitstempel-Image bleibt lokal. Nur der per Checkout-Label zugeordnete Testcontainer wird ersetzt; namensgleiche fremde Container werden abgewiesen. Bindung ausschließlich an `127.0.0.1`. Non-Root-UID und Host-HTTP-Erreichbarkeit werden geprüft. Ausgaben enthalten Schritte, URLs und Verwaltungsbefehle.
+
+```bash
 ./deplopy/local-test.sh status
 ./deplopy/local-test.sh logs
 ./deplopy/local-test.sh stop
 ```
 
-Standardadresse nach erfolgreichem Start: **http://127.0.0.1:3000**. Anmeldung ist nicht erforderlich. Ein eigener Containername lässt sich über `CONTAINER_NAME` setzen; bei Verwaltungsbefehlen denselben Namen erneut übergeben.
+Standardname: `familyos-local-demo`. Bei eigenem `CONTAINER_NAME` diesen auch für Verwaltungsbefehle setzen. Stoppen entfernt den Container, nicht Images. Kein automatisches Pruning.
 
-Das Skript baut aus dem aktuellen Arbeitsbaum inklusive uncommitteter Änderungen und erzeugt ein lokales Image mit Zeitstempel-Tag. Danach ersetzt es ausschließlich den über ein Checkout-Label zugeordneten Testcontainer. Fremde namensgleiche Container werden abgewiesen. Es veröffentlicht nur `127.0.0.1`, prüft App-UID und HTTP-Erreichbarkeit und gibt Aufrufadressen, Demo-Hinweise sowie Verwaltungsbefehle aus. Images bleiben nach dem Stoppen erhalten; es gibt kein automatisches Pruning.
+**Bei diesem Handoff aktuell geprüft:** kein Podman-Container vorhanden; auf Port 3000 ist die App nicht erreichbar. Die temporäre Standalone-Vorschau wurde nach der visuellen Prüfung beendet. Es wurde für dieses Handoff kein Dienst gestartet.
 
-**Laufzeitstatus bei Erstellung dieses Handoffs:** `familyos-local-demo` ist derzeit nicht vorhanden; Port 3000 ist nicht erreichbar. Der zuvor erfolgreiche Testlauf bedeutet nicht, dass die App aktuell läuft. Für einen neuen Test das Startskript ausführen. Im Handoff wurde kein neuer Container gestartet.
+## Verifikation und ihre Grenzen
 
-## Tatsächlich ausgeführte Prüfungen
+Die folgenden Ergebnisse stammen aus den tatsächlichen vorherigen Implementierungsläufen. Für dieses reine Handoff wurden die vollständigen Tests nicht wiederholt.
 
-Die Implementierung wurde in dieser Sitzung bereits geprüft; für das Handoff wurden keine vollständigen Tests erneut ausgeführt.
+| Prüfstand | Ergebnis |
+|---|---|
+| Aktuelle Essensplan-Erweiterung | Lint, Typecheck und Produktions-Build bestanden |
+| Unit-Tests | 10 bestanden: Kalendernavigation, Essensplanvalidierung, Jahreswechsel und DST-Wochengrenzen |
+| Browser | 18 Playwright-Tests bestanden gegen die lokale Standalone-Ausgabe bei 360, 1024 und 1440 px |
+| Browser-Abdeckung | Sechs Routen, Axe-Smoke-Checks einschließlich Validierungsfehlerzustand, Navigation, Speichern/Entfernen, getrennte Wochen, Dashboard-Abgleich, Reset nach Neuladen, Entwürfe verwerfen/erhalten und leere Wochen |
+| Zusätzlicher Overflow-Test | 20 Kombinationen aus Dashboard/Editor und zehn Breiten von 360 bis 1920 px bestanden; auch 120 Zeichen ohne Leerzeichen auf mobilem Dashboard geprüft |
+| Visuelle Prüfung | Desktop-Dashboard bei 1440 px und Mobil-Editor bei 360 px anhand von Screenshots betrachtet |
+| Podman vor Essensplan-Erweiterung | Build linux/amd64, Start, App-UID 1001, Node 24.22.3, Host-HTTP-Test, Container-Healthcheck und damalige 12 Browsertests bestanden; Podman 6.1.4 rootless |
+| Aktuelles Podman-Image mit Essensplan | Noch nicht gebaut/getestet; Startskript für Neubau ausführen |
+| Skript | `bash -n` bestanden; ungültiger Port und fremde Eigentümerschaft abgewiesen; Stoppen/Log-Follow/erneutes Ersetzen nicht separat end-to-end getestet |
 
-- Phase 1: Lint, Typecheck, Produktions-Build und vier Vitest-Tests bestanden.
-- Zwölf Playwright-Tests bestanden gegen den laufenden Podman-Container bei 360, 1024 und 1440 px, einschließlich Axe-Smoke-Checks, Navigation, Kalenderfiltern, Zuständen und Demo-Aktionen.
-- Zusätzliche Phase-1-Overflow-Prüfung: 50 Kombinationen aus fünf Routen und zehn Bildschirmbreiten bestanden.
-- Podman 6.1.4 rootless: gemeinsamer Image-Build für linux/amd64 erfolgreich; Node 24.22.3 im Image, App-UID 1001, Host-HTTP-Smoke-Test und `podman healthcheck run` bestanden.
-- Ungültiger lokaler Port und fremde Container-Eigentümerschaft wurden erwartungsgemäß abgewiesen.
-- `bash -n deplopy/local-test.sh` und `git diff --check` bestanden.
-- Stoppen, Log-Follow und erneutes Ersetzen wurden nicht separat end-to-end getestet.
-
-Für erneute Projektprüfungen:
+Erneute Prüfungen:
 
 ```bash
-npm ci
 npm run lint
 npm run typecheck
 npm test
 npm run build
 npx playwright install chromium
 npm run test:e2e
+bash -n deplopy/local-test.sh
+git diff --check
 ```
 
-Playwright verwendet einen bereits erreichbaren Dienst auf Port 3000 oder startet die lokale Standalone-Ausgabe. Für eine ausdrückliche Container-Prüfung zuerst den Podman-Test starten.
+Playwright verwendet außerhalb von CI einen bereits erreichbaren Dienst auf Port 3000 oder startet die lokale Standalone-Ausgabe. Vor einer Prüfung sicherstellen, dass dort die gewünschte Version läuft. Für Containerprüfungen erst das aktuelle Podman-Image bauen/starten.
 
-## Offene Punkte und Risiken
+## Offene Punkte
 
-- Image-Sicherheits-Scan und Registry-Push sind nicht ausgeführt. Trivy/Grype waren nicht installiert. Der Docker-Daemon-Zugriff scheiterte am Socket; der Podman-Build war erfolgreich.
-- Registry, Namespace, Zielhardware, Zugangsdatenverwaltung und Release-Ablauf sind vor Veröffentlichung zu klären. ARM64 ist nicht verifiziert. `scripts/publish-image.sh` ist der separate Release-Weg mit verpflichtendem Scan, kein lokaler Demo-Start.
-- Sieben moderate npm-Audit-Meldungen betreffen Entwicklungsabhängigkeiten im TypeScript-Lint-/minimatch-Baum. `npm audit --omit=dev` hatte keine Befunde. Der kompatible automatische Fix war nicht verfügbar.
-- ESLint 9 ist nicht mehr unterstützt, bleibt wegen der deklarierten Next.js-Plugin-Kompatibilität fixiert. Siehe `docs/decisions/0001-eslint-compatibility.md`.
-- Die Produktions-CSP erlaubt Inline-Bootstrap-Skripte. Nonce-CSP und alle Auth-/Family-Schutzmechanismen sind vor privaten Daten in Phase 2 zu behandeln. `unsafe-eval` ist nur im Entwicklungsmodus erlaubt.
-- Basisimage-Major ist fixiert, ein Release-Digest noch nicht. Automatische Accessibility-Prüfungen ersetzen keine vollständige WCAG-Prüfung; Safari/Firefox sind nicht abgedeckt.
+- Keine produktive Auth, DB, Einladungen oder Family-Isolation. Die öffentliche Demo darf keine privaten Daten enthalten.
+- Image-Sicherheits-Scan und Registry-Push wurden nicht ausgeführt. Trivy/Grype waren nicht installiert. Docker-Daemon-Zugriff scheiterte am Socket; Podman funktionierte.
+- Registry/Namespace, Zielarchitektur, Zugangsdatenverwaltung, unveränderliche Tags und Release-Ablauf vor Veröffentlichung klären. ARM64 ist nicht geprüft. Basisimage auf Node-Major 24 fixiert, Release-Digest noch nicht gepinnt.
+- `scripts/publish-image.sh` ist der getrennte Release-Weg mit Tests und verpflichtendem Scan. Der lokale Demo-Start ersetzt keine Release-Freigabe.
+- Letzter npm-Audit-Stand: sieben moderate Befunde in Entwicklungsabhängigkeiten des TypeScript-Lint-/minimatch-Baums; produktive Abhängigkeiten ohne Befunde. Nicht für dieses Handoff neu abgefragt.
+- ESLint 9 ist nicht mehr unterstützt; kompatible Plugin-Kette und Upgrade-Grenze sind in ADR 0001 dokumentiert.
+- Produktions-CSP erlaubt Next.js-Inline-Bootstrap; `unsafe-eval` nur in Entwicklung. Nonce-CSP und alle Auth-/Family-Schutzmaßnahmen vor privaten Daten prüfen.
+- Automatische Accessibility-Checks sind keine vollständige WCAG-Zertifizierung. Safari/Firefox bisher nicht geprüft.
 
-## Empfohlene Fortsetzung
+## Nächste Schritte
 
-1. Aktuellen lokalen Podman-Testweg und Dokumentation reviewen und committen.
-2. Phase-1-UI durch den Benutzer abnehmen lassen; offene Image-Scan-/Release-Prüfungen bei Bedarf abschließen.
-3. Nur nach ausdrücklicher Phase-2-Freigabe einen neuen Plan für PostgreSQL/Prisma, sichere Authentifizierung, Bootstrap, Einladungen und Familienisolation erstellen.
+1. Essensplan-Demo im Browser abnehmen und aktuellen Änderungsstand reviewen/committen.
+2. Bei Bedarf mit `./deplopy/local-test.sh` ein aktuelles Testimage einschließlich Essensplan bauen und verifizieren; Image-Scan vor Release nachholen.
+3. **Auf ausdrückliche Freigabe für Phase 2 warten.** Erst dann Repository/Tests prüfen und einen Plan für PostgreSQL/Prisma, sichere Anmeldung, Bootstrap, Einladungen und Familienisolation erstellen. Produktiver Kalender folgt in Phase 3, persistenter Essensplan in Phase 4.
 
-Weitere Details: `docs/phase-1-plan.md`, `docs/phase-1-results.md`, `docs/architecture.md`, `docs/deployment.md` und `deplopy/README.md`.
+Weiterführend: `FamilyOS_Codex_Implementierung.md`, `docs/phase-1-plan.md`, `docs/phase-1-results.md`, `docs/architecture.md`, `docs/deployment.md`, `docs/decisions/0001-eslint-compatibility.md` und `deplopy/README.md`.

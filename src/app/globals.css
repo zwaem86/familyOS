@@ -1425,3 +1425,228 @@ button:disabled {
   cursor: wait;
   opacity: 0.6;
 }
+
+/* Essensplan: flüchtige Phase-1-Demo, mobil als lesbare Tagesliste. */
+.meal-widget {
+  margin-bottom: 26px;
+  border-color: #e9e3d8;
+  background: linear-gradient(130deg, #fffdf8, #fff);
+}
+.meal-heading,
+.meal-widget-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.meal-heading h2 {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 17px;
+}
+.meal-heading svg {
+  color: #8b651e;
+}
+.meal-edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: #2356bd;
+  font-size: 12px;
+}
+.meal-tonight {
+  margin: 20px 0 16px;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.meal-tonight strong {
+  color: #795718;
+}
+.meal-week {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 9px;
+}
+.meal-week li {
+  padding: 14px 12px;
+  border: 1px solid #e6e9ed;
+  border-radius: 12px;
+  background: #fff;
+  min-width: 0;
+}
+.meal-week .meal-today,
+.meal-editor-row.meal-today {
+  border-color: #c4d4f5;
+  background: #f0f5ff;
+}
+.meal-day {
+  font-size: 11px;
+  color: #536176;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.meal-day > span:first-child {
+  font-weight: 600;
+  color: #26384f;
+}
+.meal-day strong {
+  color: #2356bd;
+}
+.meal-week p {
+  font-size: 13px;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.meal-open {
+  color: #59677a;
+  font-style: italic;
+}
+.meal-widget-footer {
+  margin-top: 14px;
+}
+.meal-widget-footer > span {
+  font-size: 11px;
+  color: #59677a;
+}
+.meal-editor {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.meal-editor-toolbar {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.meal-week-navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.meal-week-navigation h2 {
+  font-size: 16px;
+}
+.meal-editor-toolbar .state-controls {
+  margin-top: 0;
+}
+.meal-editor-days {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.meal-editor-row {
+  display: grid;
+  grid-template-columns: 155px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #e6ebf2;
+  border-radius: 12px;
+}
+.meal-editor-date {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+.meal-editor-date > span {
+  font-size: 12px;
+  color: #59677a;
+}
+.meal-editor-date strong span {
+  color: #2356bd;
+}
+.meal-input {
+  min-width: 0;
+}
+.meal-input input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #aebdce;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #172339;
+  font-size: 14px;
+}
+.meal-input input::placeholder {
+  color: #59677a;
+}
+.meal-input input[aria-invalid="true"] {
+  border-color: #af2536;
+}
+.meal-error {
+  color: #af2536;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.meal-save-status {
+  font-size: 12px;
+  color: #325b44;
+  margin-top: 18px;
+}
+@media (max-width: 1100px) {
+  .meal-week {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .meal-editor-row {
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .meal-week {
+    display: flex;
+    flex-direction: column;
+  }
+  .meal-week li {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+  }
+  .meal-week p {
+    margin: 0;
+    font-size: 14px;
+  }
+  .meal-day {
+    font-size: 12px;
+  }
+  .meal-week-navigation {
+    gap: 8px;
+    width: 100%;
+  }
+  .meal-week-navigation h2 {
+    font-size: 13px;
+    flex: 1;
+    text-align: center;
+  }
+  .meal-week-navigation .button {
+    padding: 8px;
+  }
+  .meal-editor-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .meal-editor-date {
+    grid-column: 1/-1;
+  }
+  .meal-editor-row .button {
+    padding: 10px;
+  }
+  .meal-widget-footer {
+    gap: 2px;
+  }
+}

@@ -1,6 +1,6 @@
 # FamilyOS – Master-Spezifikation für Codex
 
-> Version 1.5 · Stand: 15. November 2026  
+> Version 1.7 · Stand: 15. November 2026
 > Status: verbindliche Implementierungsrichtlinie für ein neues Projekt  
 > Zielplattform: bestehendes Homelab; Bereitstellung durch Build und Push versionierter OCI/Docker-Images in eine vorhandene Registry
 
@@ -17,13 +17,14 @@ Diese Datei ist die zentrale Produkt- und Architekturvorgabe. Lege ergänzend ei
 - Design: modern, minimalistisch, ruhiges Light Theme, Apple-inspirierte Klarheit ohne Kopieren proprietärer UI.
 - Familie: zwei Erwachsene mit getrennten Logins und gleichen Adminrechten; zwei Kinder als Familienprofile **ohne Login** in der ersten Version.
 - Kalender: zunächst eigener lokaler Kalender; spätere **Apple-iCloud-CalDAV-Integration**. In Phase 3 nur Provider-Abstraktion, noch keine echte iCloud-Anbindung.
+- Essensplan: gemeinsamer Wochenplan für das Abendessen; aktuelle Woche übersichtlich auf dem Dashboard, kommende Woche im Voraus planbar.
 - Smart Home: später; Home Assistant erst nach dem Kernprodukt integrieren.
 - Betrieb: Bestehende Homelab-Infrastruktur mit Docker Compose und klassischem Nginx direkt auf dem Host; HTTPS und externer Zugriff sind bereits eingerichtet. **Codex darf Nginx, die produktive Compose-Datei und die Infrastruktur nicht verändern.** Liefergegenstand ist ein versioniertes, registryfähiges OCI/Docker-Image samt reproduzierbarem Build-/Push-Prozess.
 - Sprache: UI standardmäßig Deutsch; Internationalisierung später möglich. Standardzeitzone `Europe/Berlin`.
 
 ### Nichtziele für die ersten drei Phasen
 
-Keine KI-Funktionen, keine Home-Assistant-Steuerung, keine produktive iCloud-Synchronisation, keine Push-Benachrichtigungen, kein komplexes Echtzeitsystem, keine Multi-Tenant-SaaS-Abrechnung. Einkauf und Aufgaben können in Phase 1 als Demo-Seiten existieren; produktive Aufgaben- und Einkaufsworkflows kommen nach Phase 3.
+Keine KI-Funktionen, keine Home-Assistant-Steuerung, keine produktive iCloud-Synchronisation, keine Push-Benachrichtigungen, kein komplexes Echtzeitsystem, keine Multi-Tenant-SaaS-Abrechnung. Einkauf, Aufgaben und Essensplan können in Phase 1 als Demo-Oberflächen existieren; produktive Aufgaben-, Einkaufs- und Essensplan-Workflows kommen nach Phase 3.
 
 ## 2. Architekturentscheidungen
 
@@ -69,7 +70,33 @@ Bevorzuge stabile, zueinander kompatible Versionen zum Implementierungszeitpunkt
 
 ### Dashboard-Widgets
 
-`GreetingWidget`, `UpcomingEventsWidget`, `TasksWidget`, `ShoppingWidget`, `WeatherWidget` (zunächst Demo), `QuickActions`. Datenquellen und Demo-Daten strikt trennen. Lade-, Leer-, Fehler- und Erfolgzustände implementieren. Dashboard-Layout später nutzerabhängig konfigurierbar.
+`GreetingWidget`, `UpcomingEventsWidget`, `TasksWidget`, `ShoppingWidget`, `WeatherWidget` (zunächst Demo), `MealPlanWidget` (Essensplan, zunächst Demo), `QuickActions`. Datenquellen und Demo-Daten strikt trennen. Lade-, Leer-, Fehler- und Erfolgzustände implementieren. Dashboard-Layout später nutzerabhängig konfigurierbar.
+
+### Essensplan – Abendessen für die Woche
+
+**Ziel:** Die Familie sieht auf einen Blick, was in der aktuellen Woche abends gegessen wird, und kann die kommende Woche vorplanen.
+
+- Eine Woche umfasst **Montag bis Sonntag**, einschließlich Wochenende. Wochenzuordnung und „Heute“ richten sich nach der Familienzeitzone, standardmäßig `Europe/Berlin`.
+- Pro Familie und lokalem Kalendertag gibt es höchstens einen Abendessenseintrag. Ein Gericht ist freier Text (1–120 Zeichen nach Trim), z. B. „Gemüselasagne“, „Reste essen“ oder „Auswärts“. Es ist keine Rezeptdatenbank erforderlich.
+- Die Planungsansicht `/meal-plan` öffnet die aktuelle Woche. „Diese Woche“, „Nächste Woche“ sowie Vor-/Zurück-Navigation zeigen jeweils den genauen Datumsbereich; Eingaben der kommenden Woche dürfen die aktuelle Woche nicht überschreiben.
+- Beide Erwachsenen können Gerichte pro Tag eintragen, ändern und entfernen. Jeder Tag ist einzeln speicherbar; eine leere Eingabe entfernt den vorhandenen Eintrag nach bewusster Speicheraktion. Kein automatisches Speichern beim Tippen.
+- Leere Tage zeigen **„Noch offen“**. Nicht vollständig geplante Wochen sind erlaubt. Ein Wochenwechsel allein speichert oder löscht keine Eingaben; bei ungespeicherten Änderungen wird vor dem Verwerfen nachgefragt.
+- Das **`MealPlanWidget` auf dem Dashboard** zeigt standardmäßig die aktuelle Woche mit Datumsbereich und allen sieben Paaren aus Wochentag/Datum und Gericht. Der heutige Tag und das heutige Abendessen werden zusätzlich hervorgehoben, auch textlich. Vergangene Tage bleiben lesbar.
+- Auf Desktop/Tablet erscheint eine kompakte Wochenübersicht, auf dem Smartphone eine gut lesbare vertikale Liste ohne horizontales Scrollen ab 360 px. Lange Gerichtsnamen umbrechen. Fehlende Einträge bleiben sichtbar.
+- „Essensplan bearbeiten“ und „Nächste Woche planen“ führen aus dem Widget direkt zur passenden Woche in `/meal-plan`. Ein zusätzlicher Eintrag in der mobilen BottomNav ist dafür nicht erforderlich.
+- Speichern und Entfernen erhalten klare Erfolgs-/Fehlerrückmeldungen; Ladezustände, leere Wochen und Tastatur-/Touch-Bedienung gehören zum Umfang. Bei Fehlern bleiben Eingaben für einen erneuten Versuch erhalten.
+- Produktive Einträge werden dauerhaft gespeichert und sind beiden berechtigten Erwachsenen zugänglich. Es gelten dieselben serverseitigen Session-/Family-ACL-Prüfungen wie für andere Familienobjekte. Kinderprofile erhalten dadurch keinen Login oder öffentlichen Zugriff.
+- Zunächst keine Rezepte, Zutatenverwaltung, Nährwerte, KI-Vorschläge, automatische Einkaufsliste oder automatische Kalendertermine. Eine spätere Einkaufsverknüpfung ist ein eigener Auftrag.
+
+**Phasenzuordnung:** Die Essensplan-Demo ist ausdrücklich als Erweiterung von Phase 1 freigegeben und gehört zu deren UI-Umfang. Sie nutzt ausschließlich isolierte fiktive Fixtures und gemeinsamen flüchtigen React-Zustand: innerhalb der App-Navigation bleiben gespeicherte Demo-Gerichte sichtbar, beim Neuladen werden sie zurückgesetzt. Das Demo-Heute richtet sich wie die übrige Phase-1-UI nach dem gekennzeichneten festen Demo-Datum. Die produktive Umsetzung mit DB-Persistenz und Family-ACLs gehört nach Phase 3 in Phase 4 zusammen mit Aufgaben und Einkauf; sie benötigt wie jede weitere Phase eine ausdrückliche Freigabe. Phase 2 ist weiterhin nicht freigegeben.
+
+**Akzeptanzkriterien:**
+
+1. Das Dashboard zeigt alle sieben Abendessen der aktuellen Familienwoche; „Heute“ und offene Tage sind eindeutig erkennbar.
+2. Gerichte für die kommende Woche können erfasst und später geändert oder entfernt werden, ohne die aktuelle Woche zu verändern.
+3. In der produktiven Umsetzung sehen beide Erwachsenen gespeicherte Änderungen auch nach Neuladen; fremde Familien können weder lesen noch schreiben.
+4. Wochenbeginn Montag, Monats-/Jahreswechsel und Sommerzeitwechsel verschieben keinen Eintrag auf ein anderes lokales Datum.
+5. Mobile Ansicht ab 360 px, Tastaturbedienung sowie Lade-, Leer-, Fehler- und Erfolgzustände sind geprüft.
 
 ## 4. Benutzer- und Berechtigungsmodell
 
@@ -100,6 +127,7 @@ Verwende UUIDs, UTC-Zeitpunkte, `createdAt`/`updatedAt` wo sinnvoll, eindeutige 
 | `Event` | id, familyId, calendarId, title, description?, startsAt, endsAt, allDay, recurrenceRule?, timestamps |
 | `EventParticipant` | eventId, familyMemberId; unique Paar |
 | `Task` | id, familyId, title, description?, status, dueAt?, assignedToId?, timestamps |
+| `MealPlanEntry` | id, familyId, date (lokales SQL-DATE), dish, timestamps; unique `(familyId,date)`; ausschließlich Abendessen |
 | `Routine` | id, familyId, title, recurrenceRule, optionale Aufgaben-Vorlage |
 | `ShoppingList` | id, familyId, name, timestamps |
 | `ShoppingItem` | id, listId, name, quantity?, unit?, checked, timestamps |
@@ -117,6 +145,7 @@ Auth.js kann zusätzliche Adaptermodelle benötigen. Diese passend zur tatsächl
 - Event-UID und Recurrence-ID für spätere CalDAV-Integration separat modellieren; nicht allein auf UID vertrauen.
 - Wiederholungen nach RFC 5545 mit Ausnahmen, Sommerzeit und Serienänderungen behandeln. Bei Phase 3 das konkrete Persistenzmodell für Ausnahmen (z. B. `EventException`) ergänzen und testen.
 - Prisma-Migrationen versionieren, keine destruktiven Schemaänderungen ohne explizite Freigabe.
+- Essensplan-Einträge verwenden ein lokales Kalendertag-Datum (`YYYY-MM-DD` / PostgreSQL `DATE`), keinen UTC-Mitternachtszeitpunkt. Der eindeutige Index `(familyId,date)` sichert einen Eintrag je Abend und unterstützt Wochenabfragen. Die Migration wird erst mit der freigegebenen produktiven Essensplan-Phase eingeführt.
 - Indexe für `(familyId, startsAt)`, `(familyId, status)`, `(familyId, dueAt)` sowie relevante externe Sync-Schlüssel.
 
 ## 6. Projektstruktur
@@ -139,6 +168,7 @@ familyos/
 │   │   ├── (dashboard)/calendar/page.tsx
 │   │   ├── (dashboard)/tasks/page.tsx
 │   │   ├── (dashboard)/shopping/page.tsx
+│   │   ├── (dashboard)/meal-plan/page.tsx
 │   │   ├── (dashboard)/settings/page.tsx
 │   │   └── api/
 │   ├── components/
@@ -151,6 +181,7 @@ familyos/
 │   │   ├── calendar/
 │   │   ├── tasks/
 │   │   ├── shopping/
+│   │   ├── meal-plan/
 │   │   └── integrations/icloud/
 │   ├── lib/
 │   │   ├── auth/
@@ -319,15 +350,15 @@ Definiere die genannten Domain-Typen separat; UI darf nicht von CalDAV-spezifisc
 
 1. Repository prüfen; Projekt mit Next.js, TypeScript, Tailwind, shadcn/ui und Lucide initialisieren.
 2. Design-Tokens, Inter, AppShell, Sidebar, Topbar, BottomNav und responsive Breakpoints implementieren.
-3. Seiten Übersicht, Kalender, Aufgaben, Einkauf, Einstellungen erstellen.
+3. Seiten Übersicht, Kalender, Aufgaben, Einkauf, Einstellungen sowie den Essensplan-Editor `/meal-plan` erstellen.
 4. Vier farbige Demo-Familienprofile, realistische Demo-Termine und Widgets einbauen.
-5. Wiederverwendbare UI-Komponenten (`GreetingWidget`, `CalendarGrid`, `EventCard`, `MemberAvatar`, `TasksWidget`, `ShoppingWidget`) bauen.
+5. Wiederverwendbare UI-Komponenten (`GreetingWidget`, `CalendarGrid`, `EventCard`, `MemberAvatar`, `TasksWidget`, `ShoppingWidget`, `MealPlanWidget`) bauen.
 6. Loading-, Empty- und Error-States sowie Tastaturbedienung ergänzen.
 7. Keine produktive Authentifizierung vortäuschen; alle Mock-Funktionen deutlich kennzeichnen.
 8. Lint, Typecheck, Build, UI-/Accessibility-Smoke-Tests durchführen.
 9. README aktualisieren und Git-Commit vorschlagen.
 
-**Akzeptanz:** Navigation funktioniert, kein horizontaler Overflow ab 360 px, Touch-Bedienung auf Tablet, Build/Tests erfolgreich, Mock-Daten klar isoliert.
+**Akzeptanz:** Navigation funktioniert, kein horizontaler Overflow ab 360 px, Touch-Bedienung auf Tablet, Build/Tests erfolgreich, Mock-Daten klar isoliert. Essensplan zeigt sieben Abendessen im Dashboard; aktuelle und kommende Wochen sind separat editierbar, Änderungen bleiben beim internen Navigieren sichtbar und werden beim Neuladen zurückgesetzt.
 
 ### Phase 2 – Datenbank, Login und Familienverwaltung
 
@@ -370,11 +401,11 @@ Definiere die genannten Domain-Typen separat; UI darf nicht von CalDAV-spezifisc
 
 ### Danach (nicht Teil der ersten drei Phasen)
 
-4. Aufgaben/Routinen und Einkaufsliste produktiv umsetzen.  
+4. Aufgaben/Routinen, Einkaufsliste und **Essensplan** gemäß Abschnitt 3 produktiv umsetzen; einschließlich Dashboard-Widget, Wocheneditor, Persistenz, Family-Isolation und Tests.
 5. iCloud-CalDAV-Import zunächst read-only mit Sync-Worker.  
 6. PWA und optional geschützter Tablet-Kiosk-Modus.  
 7. Home Assistant als getrenntes Integrationsmodul.  
-8. Optional KI-Assistenz, Essensplanung, Fotos und Benachrichtigungen.
+8. Optional KI-Assistenz, Fotos und Benachrichtigungen.
 
 ## 11. Teststrategie und Definition of Done
 
@@ -386,6 +417,7 @@ Definiere die genannten Domain-Typen separat; UI darf nicht von CalDAV-spezifisc
 - Playwright-E2E für Login, Einladung, Termin-CRUD und responsive Navigation.
 - Security-Tests: unautorisierte Server Actions, fremde `familyId`, fremde Objekt-IDs, Token-Replay, abgelaufene Einladungen, Rate-Limits.
 - Zeit-/Kalendertests: DST-Wechsel, Ganztag, wiederkehrende Ausnahmen, mehrtägige Events.
+- Essensplan-Tests (mit Umsetzung): aktuelle/kommende Woche getrennt, Anlegen/Ändern/Entfernen, offene Tage, persistente Anzeige für beide Erwachsenen, Cross-Family-Sperren, Montag-Wochenstart, Monats-/Jahreswechsel, DST und responsive Dashboard-Anzeige.
 - Docker-Checks: `docker compose config`, Healthchecks, keine DB-Portfreigabe, App hinter Proxy, Restore-Test.
 
 ### Definition of Done pro Phase

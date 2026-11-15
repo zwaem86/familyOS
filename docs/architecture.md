@@ -17,3 +17,12 @@ Die gesamte UI ist öffentlich. Keine echten Familieninformationen eingeben. Kin
 CSP beschränkt Ressourcen auf die eigene Origin, verhindert Einbettung und fremde Form-Ziele. Next.js benötigt für den statischen Bootstrap aktuell Inline-Skripte; daher `script-src 'self' 'unsafe-inline'`. Dies schützt nicht vollständig vor Script-Injection und muss vor Verarbeitung privater Daten mit einer Nonce-Strategie überprüft werden. React rendert sämtliche Demo-Eingaben als Text. Nur im Entwicklungsmodus wird für React-Debugging gemäß Next.js-Dokumentation zusätzlich `unsafe-eval` erlaubt; die Produktions-CSP schließt es aus. HTTPS/HSTS bleiben Aufgabe der vorhandenen Infrastruktur.
 
 Die Kompatibilitätsentscheidung für ESLint ist in [ADR 0001](decisions/0001-eslint-compatibility.md) dokumentiert. Installierte Versionen stehen exakt in `package.json` und `package-lock.json`. Buildumgebung: Node 26.13.0; Image: unterstützter Node-LTS-Major 24 auf Debian Bookworm slim. Der Container-Build ist separat zu verifizieren.
+
+
+## Essensplan-Demo (Phase-1-Erweiterung)
+
+`src/features/meal-plan` besitzt eigene fiktive Fixtures und eine reine Eingabevalidierung (Trim, maximal 120 Zeichen; leer bedeutet Entfernen). `DemoMealProvider` im Dashboard-Layout hält gespeicherte Gerichte ausschließlich im React-Speicher, sodass `/meal-plan` und das Dashboard denselben Stand zeigen. Es gibt keine Browser-Persistenz, Datenbank oder API. Neuladen setzt den Stand zurück.
+
+Der Editor hält ungespeicherte Entwürfe separat; Speichern ändert genau den lokalen Datumsschlüssel eines Tages. Ein bestätigter Wochenwechsel verwirft nur Entwürfe, keine gespeicherten Demo-Gerichte. Vor Neuladen mit offenen Entwürfen greift zusätzlich die Browserwarnung. Formularfelder werden erst nach Hydrierung aktiviert. Der aktuelle Demo-Tag entspricht dem übrigen Prototyp, `2026-11-16`. Die vorhandenen datumsschlüsselbasierten Kalenderhilfen werden wiederverwendet. Wochen reichen von Montag bis Sonntag.
+
+`/meal-plan?week=next` öffnet die Folgewoche aus dem Dashboard. `useSearchParams` liegt unter einer Suspense-Grenze mit gemeinsamem Ladezustand. Diese Demo ersetzt nicht die späteren autorisierten Datenzugriffe oder das SQL-DATE-Modell.

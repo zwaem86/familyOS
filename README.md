@@ -19,9 +19,10 @@ http://127.0.0.1:3000 öffnen. Keine `.env`-Werte nötig. Inter und alle Assets 
 
 ## Umfang
 
-- Übersicht mit Begrüßung, Terminen, Aufgaben, Einkauf, Demo-Wetter und Schnellzugriffen.
+- Übersicht mit Begrüßung, Terminen, Aufgaben, Einkauf, Demo-Wetter, Essensplan und Schnellzugriffen.
 - Kalender mit Tages-, Wochen- und Monatsansicht, Zeitnavigation und Profilfiltern; keine produktive Terminverwaltung.
 - Aufgaben und Einkauf: lokal hinzufügen und abhaken. Neuladen setzt Änderungen zurück.
+- Essensplan: Dashboard-Wochenübersicht und `/meal-plan` mit sieben Abendessen, Wochenwechsel und tageweisem Speichern/Entfernen. Änderungen bleiben beim Navigieren sichtbar; Neuladen setzt sie zurück. Ungespeicherte Eingaben werden beim Wochenwechsel geschützt.
 - Einstellungen: vier fiktive Profile sowie Lade-, Leer-, Fehler- und Erfolgsvorschau.
 - Desktop-Sidebar, mobile BottomNav, Tablet-Touch-Bedienung, Sprunglink und Fokusindikatoren.
 

@@ -111,6 +111,7 @@ log '1/5 – Bereite die fiktiven Testdaten vor.'
 printf '%s\n' \
   'Die vorhandenen Fixtures werden beim Image-Build eingebunden:' \
   '  src/features/dashboard/demo-data.ts' \
+  '  src/features/meal-plan/demo-data.ts (fiktive Abendessen)' \
   '  Profile: Anna, Ben, Mila und Leo; dazu Termine, Aufgaben und Einkauf.' \
   '  Demo-Heute: Montag, 16. November 2026, Europe/Berlin.' \
   'Kein DB-Seed erforderlich: Phase 1 besitzt noch keine Datenbank.' \
@@ -179,6 +180,7 @@ cat <<READY
   Kalender:      $url/calendar
   Aufgaben:      $url/tasks
   Einkauf:       $url/shopping
+  Essensplan:    $url/meal-plan
   Einstellungen: $url/settings
   Health:        $url/api/health/live
 
@@ -188,7 +190,8 @@ cat <<READY
   Es wurden keine Zugangsdaten und keine Datenbank angelegt.
 
   Testen: Kalenderansichten/Profilfilter wechseln, Aufgaben und Artikel
-  hinzufügen oder abhaken. Zum Zurücksetzen die Seite neu laden.
+  hinzufügen oder abhaken, Abendessen im Essensplan tageweise speichern.
+  Zum Zurücksetzen die Seite neu laden.
 
   Erreichbar nur auf diesem Rechner über 127.0.0.1, nicht im LAN.
   Bei einem entfernten Rechner bleibt die Adresse dort lokal;

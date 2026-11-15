@@ -12,7 +12,7 @@ Es baut das bestehende Multi-Stage-Dockerfile mit einem lokalen Zeitstempel-Tag,
 
 Nach erfolgreichem Start: **http://127.0.0.1:3000**.
 
-**Anmeldung: keine.** Phase 1 hat keine Login-Seite, Konten oder Passwörter. Die vier Profile Anna, Ben, Mila und Leo sind fiktiv. Kalender, Aufgaben und Einkauf werden aus `src/features/dashboard/demo-data.ts` eingebunden. Ein zusätzlicher DB-Seed ist ohne Datenbank nicht nötig. Ein persistenter Seed und echte Testkonten werden erst mit der ausdrücklich freigegebenen Phase 2 ergänzt.
+**Anmeldung: keine.** Phase 1 hat keine Login-Seite, Konten oder Passwörter. Die vier Profile Anna, Ben, Mila und Leo sind fiktiv. Kalender, Aufgaben und Einkauf werden aus `src/features/dashboard/demo-data.ts` eingebunden. Fiktive Abendessen kommen zusätzlich aus `src/features/meal-plan/demo-data.ts`; sie erscheinen im Dashboard und unter `/meal-plan`. Ein zusätzlicher DB-Seed ist ohne Datenbank nicht nötig. Ein persistenter Seed und echte Testkonten werden erst mit der ausdrücklich freigegebenen Phase 2 ergänzt.
 
 Demo-Aufgaben und Einkaufsartikel lassen sich lokal hinzufügen und abhaken. Kalenderansichten und Profilfilter sind bedienbar. Neuladen setzt Eingaben zurück. Bitte keine echten Familieninformationen eingeben.
 

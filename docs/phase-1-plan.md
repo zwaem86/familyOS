@@ -21,3 +21,7 @@ Die vollständige `FamilyOS_Codex_Implementierung.md` Version 1.5 ist verbindlic
 ## Stoppbedingung
 
 Die fünf Seiten sind navigierbar, Demo-Funktionen bedienbar, Tests nachvollziehbar und Grenzen dokumentiert. Auth, Prisma, Einladungen und produktiver Kalender sind nicht Bestandteil dieser Phase. Phase 2 beginnt erst nach ausdrücklicher Freigabe.
+
+## Freigegebene Erweiterung: Essensplan-Demo
+
+Der Benutzer hat den Essensplan ausdrücklich für Phase 1 beauftragt. Umsetzung: getrennte fiktive Fixtures, gemeinsamer flüchtiger React-Zustand im Dashboard-Layout, Wochenwidget und `/meal-plan` mit tageweisem Speichern/Entfernen. Wochenwechsel fragen bei ungespeicherten Eingaben nach. Vorhandene Datumshilfen und UI-Komponenten werden wiederverwendet. Keine DB, Auth oder persistenten Browserdaten. Prüfung durch Unit-Tests für Validierung/Wochengrenzen und Playwright für Editor, Dashboard-Abgleich, Neuladen, mobile Darstellung und Accessibility. Danach stoppen; Phase 2 bleibt nicht freigegeben.

@@ -20,6 +20,7 @@ test("all routes, responsive layout and accessibility", async ({ page }) => {
     ["/tasks", "Aufgaben"],
     ["/shopping", "Einkauf"],
     ["/settings", "Einstellungen"],
+    ["/meal-plan", "Euer Essensplan"],
   ]) {
     await page.goto(route);
     await expect(
@@ -36,6 +37,7 @@ test("all routes, responsive layout and accessibility", async ({ page }) => {
     expect(result.violations).toEqual([]);
   }
   expect(errors).toEqual([]);
+  await page.goto("/settings");
   await page.keyboard.press("Tab");
   await expect(page.getByText("Zum Inhalt springen")).toBeFocused();
   await page.keyboard.press("Enter");
